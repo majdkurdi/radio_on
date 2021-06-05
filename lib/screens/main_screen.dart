@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:just_audio/just_audio.dart';
 import '../modals/channel.dart';
-import '../services/channels_getter.dart';
+import '../providers/countries_provider.dart';
 import '../providers/channels_provider.dart';
 import '../widgets/list_tile_widget.dart';
 
@@ -15,7 +15,6 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  List<String> countries = [];
   String chosenCountry = 'Syrian Arab Republic';
   bool loading = false;
 
@@ -41,18 +40,23 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    List<String> countries = Provider.of<CountriesProvider>(context).countries;
     List<Channel> channels = Provider.of<ChannelsProvider>(context).channels;
     return Scaffold(
       appBar: AppBar(
         title: Text('Radio ON'),
         actions: [
+          Text(
+            chosenCountry,
+            textAlign: TextAlign.center,
+          ),
           PopupMenuButton(
-            itemBuilder: (_) => countries.map((e) {
-              return PopupMenuItem(
-                child: Text(e),
-                value: e,
-              );
-            }).toList(),
+            itemBuilder: (context) => countries
+                .map((e) => PopupMenuItem(
+                      child: Text(e, style: TextStyle(color: Colors.black54)),
+                      value: e,
+                    ))
+                .toList(),
             onSelected: (value) async {
               await Provider.of<ChannelsProvider>(context)
                   .updateChannels(value);
@@ -61,7 +65,6 @@ class _MainScreenState extends State<MainScreen> {
               });
             },
           ),
-          Text(chosenCountry),
         ],
       ),
       body: loading
