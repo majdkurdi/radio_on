@@ -1,3 +1,4 @@
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import './screens/main_screen.dart';
@@ -29,7 +30,7 @@ class MyApp extends StatelessWidget {
           MainScreen.roruteName: (ctx) => MainScreen(),
           WelcomeScreen.routeName: (ctx) => WelcomeScreen()
         },
-        home: WelcomeScreen(),
+        home: AudioServiceWidget(child: WelcomeScreen()),
       ),
     );
   }
