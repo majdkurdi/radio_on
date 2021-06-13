@@ -12,10 +12,13 @@ class AudioPlayerTask extends BackgroundAudioTask {
         controls: [MediaControl.pause, MediaControl.stop],
         playing: true,
         processingState: AudioProcessingState.connecting);
-
-    await _player.setUrl(params['url']);
-    await _player.play();
-
+    if (params['url'] != null) {
+      await _player.setUrl(params['url']);
+      await _player.play();
+    } else if (params['path'] != null) {
+      await _player.setFilePath(params['path']);
+      await _player.play();
+    }
     AudioServiceBackground.setState(
         controls: [MediaControl.pause, MediaControl.stop],
         playing: true,

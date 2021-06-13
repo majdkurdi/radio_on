@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import './screens/main_screen.dart';
 import './screens/welcome_screen.dart';
+import './screens/music_player.dart';
+import './screens/player_screen.dart';
 import './providers/countries_provider.dart';
 import './providers/channels_provider.dart';
+import './providers/songs_provider.dart';
 
 void main() {
   runApp(MyApp());
@@ -17,6 +20,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider.value(value: CountriesProvider()),
         ChangeNotifierProvider.value(value: ChannelsProvider()),
+        ChangeNotifierProvider.value(value: SongsProvider()),
       ],
       child: MaterialApp(
         theme: ThemeData(
@@ -28,7 +32,9 @@ class MyApp extends StatelessWidget {
         ),
         routes: {
           MainScreen.roruteName: (ctx) => MainScreen(),
-          WelcomeScreen.routeName: (ctx) => WelcomeScreen()
+          WelcomeScreen.routeName: (ctx) => WelcomeScreen(),
+          MusicPlayer.routeName: (ctx) => MusicPlayer(),
+          PlayerScreen.routeName: (ctx) => PlayerScreen()
         },
         home: AudioServiceWidget(child: WelcomeScreen()),
       ),

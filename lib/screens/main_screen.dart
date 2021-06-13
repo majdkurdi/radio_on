@@ -6,6 +6,7 @@ import '../modals/channel.dart';
 import '../providers/countries_provider.dart';
 import '../providers/channels_provider.dart';
 import '../widgets/list_tile_widget.dart';
+import '../widgets/drawer.dart';
 import '../services/background_audio_service.dart';
 
 class MainScreen extends StatefulWidget {
@@ -94,6 +95,7 @@ class _MainScreenState extends State<MainScreen> {
           ),
         ],
       ),
+      drawer: MainDrawer(),
       body: Column(
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
