@@ -13,7 +13,7 @@ class PlayerScreen extends StatefulWidget {
 }
 
 class _PlayerScreenState extends State<PlayerScreen> {
-  bool playing = false;
+  bool playing = true;
 
   @override
   void initState() {

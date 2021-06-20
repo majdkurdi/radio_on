@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../modals/channel.dart';
 
@@ -11,10 +12,15 @@ class ChannelsGetter {
 
     http.Response response = await http.get(Uri.parse(url));
     List<Channel> channels = [];
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     var extractedData = jsonDecode(response.body);
     extractedData.forEach((e) {
-      channels
-          .add(Channel(name: e['name'], url: e['url'], imageUrl: e['favicon']));
+      channels.add(Channel(
+          name: e['name'],
+          url: e['url'],
+          imageUrl: e['favicon'],
+          id: e['changeuuid'],
+          isFavorite: prefs.getBool('${e['changeuuid']}') ?? false));
     });
 
     return channels;

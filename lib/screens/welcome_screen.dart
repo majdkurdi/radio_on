@@ -11,9 +11,7 @@ class WelcomeScreen extends StatelessWidget {
     Provider.of<CountriesProvider>(context, listen: false)
         .updateCountries()
         .then((_) {
-      Future.delayed(Duration(seconds: 2)).then((value) {
-        Navigator.pushReplacementNamed(context, MainScreen.roruteName);
-      });
+      Navigator.pushReplacementNamed(context, MainScreen.roruteName);
     });
     return Scaffold(
       body: Column(

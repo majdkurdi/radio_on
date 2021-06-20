@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
 import '../modals/channel.dart';
 
-class ListTileWidget extends StatelessWidget {
+class ListTileWidget extends StatefulWidget {
   final Channel channel;
   final Function onPressed;
 
   ListTileWidget({@required this.channel, @required this.onPressed});
+
+  @override
+  _ListTileWidgetState createState() => _ListTileWidgetState();
+}
+
+class _ListTileWidgetState extends State<ListTileWidget> {
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         GestureDetector(
           onTap: () async {
-            await onPressed(channel.url);
+            await widget.onPressed(widget.channel.url);
           },
           child: ListTile(
             leading: Container(
@@ -36,7 +42,18 @@ class ListTileWidget extends StatelessWidget {
                     ),
               ),
             ),
-            title: Text(channel.name),
+            title: Text(
+              widget.channel.name,
+            ),
+            trailing: IconButton(
+                icon: Icon(widget.channel.isFavorite
+                    ? Icons.favorite
+                    : Icons.favorite_border),
+                onPressed: () {
+                  setState(() {
+                    widget.channel.toggleFavorite(context);
+                  });
+                }),
           ),
         ),
         Divider(

@@ -19,7 +19,11 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   String chosenCountry = 'Syrian Arab Republic';
   bool loading = false;
+  bool search = false;
   Channel chosenChannel;
+  final textController = TextEditingController();
+  String searchText;
+  int navigationIndex = 0;
 
   initAudioService() async {
     await AudioService.connect();
@@ -63,6 +67,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void dispose() {
     AudioService.disconnect();
+    textController.dispose();
     super.dispose();
   }
 
@@ -70,89 +75,118 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     List<String> countries = Provider.of<CountriesProvider>(context).countries;
     List<Channel> channels = Provider.of<ChannelsProvider>(context).channels;
+    List<Channel> favorites = Provider.of<ChannelsProvider>(context).favorites;
+    List<Channel> searchRes =
+        Provider.of<ChannelsProvider>(context, listen: false)
+            .search(searchText);
     return Scaffold(
       appBar: AppBar(
-        title: Text('Radio ON'),
+        title: search
+            ? TextField(
+                controller: textController,
+                decoration: InputDecoration(
+                  hintText: 'Search',
+                  fillColor: Colors.white,
+                ),
+                cursorColor: Colors.black12,
+                onChanged: (val) {
+                  setState(() {
+                    searchText = val;
+                  });
+                },
+              )
+            : Text('Radio ON'),
         actions: [
-          Text(
-            chosenCountry,
-            textAlign: TextAlign.center,
-          ),
-          PopupMenuButton(
-            itemBuilder: (context) => countries
-                .map((e) => PopupMenuItem(
-                      child: Text(e, style: TextStyle(color: Colors.black54)),
-                      value: e,
-                    ))
-                .toList(),
-            onSelected: (value) async {
-              await Provider.of<ChannelsProvider>(context, listen: false)
-                  .updateChannels(value);
-              setState(() {
-                chosenCountry = value;
-              });
-            },
-          ),
+          IconButton(
+              icon: Icon(search ? Icons.arrow_forward : Icons.search),
+              onPressed: () {
+                setState(() {
+                  search = !search;
+                });
+              }),
+          if (!search)
+            PopupMenuButton(
+              icon: Icon(Icons.language),
+              itemBuilder: (context) => countries
+                  .map((e) => PopupMenuItem(
+                        child: Text(e, style: TextStyle(color: Colors.black54)),
+                        value: e,
+                      ))
+                  .toList(),
+              onSelected: (value) async {
+                await Provider.of<ChannelsProvider>(context, listen: false)
+                    .updateChannels(value);
+                setState(() {
+                  chosenCountry = value;
+                });
+              },
+            ),
         ],
       ),
       drawer: MainDrawer(),
-      body: Column(
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Stack(children: [
-            Container(
-              width: double.infinity,
-              height: MediaQuery.of(context).size.height / 4,
-              color: Theme.of(context).primaryColor,
+      body: loading
+          ? Center(
+              child: CircularProgressIndicator(
+              valueColor:
+                  AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
+            ))
+          : ListView.builder(
+              itemBuilder: (ctx, i) => ListTileWidget(
+                  channel: search
+                      ? searchRes[i]
+                      : (navigationIndex == 0 ? channels[i] : favorites[i]),
+                  onPressed: (String url) async {
+                    updateChosenChannel(url);
+                    if (AudioService.playbackState.playing)
+                      await AudioService.stop();
+                    await initAudioService();
+                    AudioService.start(
+                        backgroundTaskEntrypoint: entrypoint,
+                        params: {'url': url});
+                  }),
+              itemCount: search
+                  ? searchRes.length
+                  : (navigationIndex == 0 ? channels.length : favorites.length),
             ),
-            Positioned(
-              child: StreamBuilder<PlaybackState>(
-                stream: AudioService.playbackStateStream,
-                builder: (context, snapshot) {
-                  var isPlaying = snapshot.data?.playing ?? false;
-                  return FloatingActionButton(
-                    onPressed: () async {
-                      if (isPlaying) {
-                        AudioService.stop();
-                      } else {
-                        AudioService.connect();
-                        AudioService.start(
-                            backgroundTaskEntrypoint: entrypoint,
-                            params: {'url': chosenChannel.url});
-                      }
-                    },
-                    backgroundColor: Theme.of(context).primaryColor,
-                    child: Icon(isPlaying ? Icons.stop : Icons.play_arrow),
-                  );
-                },
-              ),
-              right: 20,
-              bottom: 20,
-            ),
-          ]),
-          SizedBox(
-            height: 10,
+      floatingActionButton: StreamBuilder<PlaybackState>(
+        stream: AudioService.playbackStateStream,
+        builder: (context, snapshot) {
+          var isPlaying = snapshot.data?.playing ?? false;
+          return FloatingActionButton(
+            onPressed: () async {
+              if (isPlaying) {
+                AudioService.stop();
+              } else {
+                AudioService.connect();
+                AudioService.start(
+                    backgroundTaskEntrypoint: entrypoint,
+                    params: {'url': chosenChannel.url});
+              }
+            },
+            backgroundColor: Theme.of(context).primaryColor,
+            child: Icon(isPlaying ? Icons.stop : Icons.play_arrow),
+          );
+        },
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.radio),
+            label: 'All',
+            activeIcon: Icon(Icons.radio_outlined),
           ),
-          Expanded(
-            child: loading
-                ? Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    itemBuilder: (ctx, i) => ListTileWidget(
-                        channel: channels[i],
-                        onPressed: (String url) async {
-                          updateChosenChannel(url);
-                          if (AudioService.playbackState.playing)
-                            await AudioService.stop();
-                          await initAudioService();
-                          AudioService.start(
-                              backgroundTaskEntrypoint: entrypoint,
-                              params: {'url': url});
-                        }),
-                    itemCount: channels.length,
-                  ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite_border),
+            label: 'Favorites',
+            activeIcon: Icon(Icons.favorite),
           ),
         ],
+        onTap: (index) {
+          setState(() {
+            navigationIndex = index;
+          });
+        },
+        currentIndex: navigationIndex,
       ),
     );
   }

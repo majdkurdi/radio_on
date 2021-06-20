@@ -5,11 +5,12 @@ import '../screens/music_player.dart';
 class MainDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Drawer(
+        child: Column(
       children: [
         Container(
           width: double.infinity,
-          height: 100,
+          height: 150,
           color: Theme.of(context).primaryColor,
         ),
         GestureDetector(
@@ -37,6 +38,6 @@ class MainDrawer extends StatelessWidget {
           ),
         )
       ],
-    );
+    ));
   }
 }
