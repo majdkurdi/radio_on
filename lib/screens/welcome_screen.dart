@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import './main_screen.dart';
+import 'RadioScreen.dart';
 import '../providers/countries_provider.dart';
 
 class WelcomeScreen extends StatelessWidget {
@@ -11,7 +11,7 @@ class WelcomeScreen extends StatelessWidget {
     Provider.of<CountriesProvider>(context, listen: false)
         .updateCountries()
         .then((_) {
-      Navigator.pushReplacementNamed(context, MainScreen.roruteName);
+      Navigator.pushReplacementNamed(context, RadioScreen.roruteName);
     });
     return Scaffold(
       body: Column(

@@ -5,23 +5,22 @@ import 'package:audio_service/audio_service.dart';
 import '../modals/channel.dart';
 import '../providers/countries_provider.dart';
 import '../providers/channels_provider.dart';
-import '../widgets/list_tile_widget.dart';
+import '../widgets/channel_list_tile.dart';
 import '../widgets/drawer.dart';
 import '../services/background_audio_service.dart';
 
-class MainScreen extends StatefulWidget {
+class RadioScreen extends StatefulWidget {
   static const String roruteName = '/main-screen';
 
   @override
-  _MainScreenState createState() => _MainScreenState();
+  _RadioScreenState createState() => _RadioScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _RadioScreenState extends State<RadioScreen> {
   String chosenCountry = 'Syrian Arab Republic';
   bool loading = false;
   bool search = false;
   Channel chosenChannel;
-  final textController = TextEditingController();
   String searchText;
   int navigationIndex = 0;
 
@@ -41,34 +40,27 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     Future.delayed(Duration(seconds: 0)).then((value) async {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
+      // SharedPreferences prefs = await SharedPreferences.getInstance();
       setState(() {
         loading = true;
       });
-      if (prefs.getString('country') != null) {
-        chosenCountry = prefs.getString('country');
-      }
+      // if (prefs.getString('country') != null) {
+      //   chosenCountry = prefs.getString('country');
+      // }
       await Provider.of<ChannelsProvider>(context, listen: false)
           .updateChannels(chosenCountry);
-      if (prefs.getString('channelName') != null) {
-        chosenChannel = Provider.of<ChannelsProvider>(context, listen: false)
-            .channels
-            .firstWhere(
-                (element) => element.name == prefs.getString('channelName'));
-      }
+      // if (prefs.getString('channelName') != null) {
+      //   chosenChannel = Provider.of<ChannelsProvider>(context, listen: false)
+      //       .channels
+      //       .firstWhere(
+      //           (element) => element.name == prefs.getString('channelName'));
+      // }
       setState(() {
         loading = false;
       });
     });
     initAudioService();
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    AudioService.disconnect();
-    textController.dispose();
-    super.dispose();
   }
 
   @override
@@ -83,7 +75,6 @@ class _MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         title: search
             ? TextField(
-                controller: textController,
                 decoration: InputDecoration(
                   hintText: 'Search',
                   fillColor: Colors.white,
@@ -131,7 +122,7 @@ class _MainScreenState extends State<MainScreen> {
                   AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
             ))
           : ListView.builder(
-              itemBuilder: (ctx, i) => ListTileWidget(
+              itemBuilder: (ctx, i) => ChannelListTile(
                   channel: search
                       ? searchRes[i]
                       : (navigationIndex == 0 ? channels[i] : favorites[i]),

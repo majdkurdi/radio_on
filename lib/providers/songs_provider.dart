@@ -13,6 +13,14 @@ class SongsProvider with ChangeNotifier {
     return [..._mySongs];
   }
 
+  List<SongInfo> searchRes(String sText) {
+    if (sText == null || sText == '') return [];
+    return _mySongs
+        .where((element) =>
+            element.title.toLowerCase().contains(sText.toLowerCase()))
+        .toList();
+  }
+
   Future<void> getSongs() async {
     FlutterAudioQuery audioQuery = FlutterAudioQuery();
 

@@ -13,16 +13,6 @@ class PlayerScreen extends StatefulWidget {
 }
 
 class _PlayerScreenState extends State<PlayerScreen> {
-  bool playing = true;
-
-  @override
-  void initState() {
-    super.initState();
-    setState(() {
-      playing = AudioService.playbackState.playing;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     SongInfo currrentSong = Provider.of<SongsProvider>(context).currentSong;
@@ -31,26 +21,24 @@ class _PlayerScreenState extends State<PlayerScreen> {
         title: Text('Player'),
       ),
       body: Column(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           Padding(
             padding: const EdgeInsets.all(20.0),
             child: Text(currrentSong.title),
           ),
-          SizedBox(
-            height: 20,
-          ),
-          Image(
-            image: AssetImage('assets/def.png'),
-            height: 100,
-            width: 100,
-          ),
-          SizedBox(
-            height: 20,
+          Hero(
+            tag: 'player_photo',
+            child: Image(
+              image: AssetImage('assets/def.png'),
+            ),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               FloatingActionButton(
+                backgroundColor: Theme.of(context).primaryColor,
                 onPressed: () async {
                   var previousSong =
                       Provider.of<SongsProvider>(context, listen: false)
@@ -65,16 +53,25 @@ class _PlayerScreenState extends State<PlayerScreen> {
                 },
                 child: Icon(Icons.skip_previous),
               ),
-              FloatingActionButton(
-                onPressed: () {
-                  playing ? AudioService.pause() : AudioService.play();
-                  setState(() {
-                    playing = !playing;
-                  });
+              StreamBuilder(
+                builder: (context, snapshot) {
+                  var playing = snapshot.data?.playing ?? false;
+                  return FloatingActionButton(
+                    backgroundColor: Theme.of(context).primaryColor,
+                    onPressed: () {
+                      playing
+                          ? AudioService.stop()
+                          : AudioService.start(
+                              backgroundTaskEntrypoint: entrypoint,
+                              params: {'path': currrentSong.filePath});
+                    },
+                    child: Icon(playing ? Icons.stop : Icons.play_arrow),
+                  );
                 },
-                child: Icon(playing ? Icons.stop : Icons.play_arrow),
+                stream: AudioService.playbackStateStream,
               ),
               FloatingActionButton(
+                backgroundColor: Theme.of(context).primaryColor,
                 onPressed: () async {
                   var nextSong =
                       Provider.of<SongsProvider>(context, listen: false)

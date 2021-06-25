@@ -1,9 +1,9 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import './screens/main_screen.dart';
+import 'screens/RadioScreen.dart';
 import './screens/welcome_screen.dart';
-import './screens/music_player.dart';
+import './screens/music_screen.dart';
 import './screens/player_screen.dart';
 import './providers/countries_provider.dart';
 import './providers/channels_provider.dart';
@@ -31,9 +31,9 @@ class MyApp extends StatelessWidget {
           ),
         ),
         routes: {
-          MainScreen.roruteName: (ctx) => MainScreen(),
+          RadioScreen.roruteName: (ctx) => RadioScreen(),
           WelcomeScreen.routeName: (ctx) => WelcomeScreen(),
-          MusicPlayer.routeName: (ctx) => MusicPlayer(),
+          MusicScreen.routeName: (ctx) => MusicScreen(),
           PlayerScreen.routeName: (ctx) => PlayerScreen()
         },
         home: AudioServiceWidget(child: WelcomeScreen()),

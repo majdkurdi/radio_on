@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../screens/main_screen.dart';
-import '../screens/music_player.dart';
+import '../screens/RadioScreen.dart';
+import '../screens/music_screen.dart';
 
 class MainDrawer extends StatelessWidget {
   @override
@@ -15,7 +15,7 @@ class MainDrawer extends StatelessWidget {
         ),
         GestureDetector(
           onTap: () {
-            Navigator.of(context).pushReplacementNamed(MusicPlayer.routeName);
+            Navigator.of(context).pushReplacementNamed(MusicScreen.routeName);
           },
           child: ListTile(
             leading: Icon(
@@ -27,7 +27,7 @@ class MainDrawer extends StatelessWidget {
         ),
         GestureDetector(
           onTap: () {
-            Navigator.of(context).pushReplacementNamed(MainScreen.roruteName);
+            Navigator.of(context).pushReplacementNamed(RadioScreen.roruteName);
           },
           child: ListTile(
             leading: Icon(
