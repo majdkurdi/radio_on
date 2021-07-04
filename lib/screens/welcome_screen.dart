@@ -3,16 +3,33 @@ import 'package:provider/provider.dart';
 
 import 'RadioScreen.dart';
 import '../providers/countries_provider.dart';
+import '../providers/songs_provider.dart';
 
-class WelcomeScreen extends StatelessWidget {
+class WelcomeScreen extends StatefulWidget {
   static const String routeName = 'welcome-screen';
+
   @override
-  Widget build(BuildContext context) {
-    Provider.of<CountriesProvider>(context, listen: false)
-        .updateCountries()
-        .then((_) {
+  _WelcomeScreenState createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  @override
+  void initState() {
+    Future.delayed(Duration(seconds: 0)).then((value) async {
+      print(1);
+      await Provider.of<CountriesProvider>(context, listen: false)
+          .updateCountries();
+      print(2);
+      await Provider.of<SongsProvider>(context, listen: false).getSongs();
+    }).then((value) {
+      print(3);
       Navigator.pushReplacementNamed(context, RadioScreen.roruteName);
     });
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

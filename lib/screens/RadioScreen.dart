@@ -40,27 +40,33 @@ class _RadioScreenState extends State<RadioScreen> {
   @override
   void initState() {
     Future.delayed(Duration(seconds: 0)).then((value) async {
-      // SharedPreferences prefs = await SharedPreferences.getInstance();
+      SharedPreferences prefs = await SharedPreferences.getInstance();
       setState(() {
         loading = true;
       });
-      // if (prefs.getString('country') != null) {
-      //   chosenCountry = prefs.getString('country');
-      // }
+      if (prefs.getString('country') != null) {
+        chosenCountry = prefs.getString('country');
+      }
       await Provider.of<ChannelsProvider>(context, listen: false)
           .updateChannels(chosenCountry);
-      // if (prefs.getString('channelName') != null) {
-      //   chosenChannel = Provider.of<ChannelsProvider>(context, listen: false)
-      //       .channels
-      //       .firstWhere(
-      //           (element) => element.name == prefs.getString('channelName'));
-      // }
+      if (prefs.getString('channelName') != null) {
+        chosenChannel = Provider.of<ChannelsProvider>(context, listen: false)
+            .channels
+            .firstWhere(
+                (element) => element.name == prefs.getString('channelName'));
+      }
       setState(() {
         loading = false;
       });
     });
     initAudioService();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    AudioService.disconnect();
+    super.dispose();
   }
 
   @override

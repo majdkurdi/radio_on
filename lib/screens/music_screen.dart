@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_audio_query/flutter_audio_query.dart';
 import 'package:audio_service/audio_service.dart';
 import '../screens/player_screen.dart';
 import '../widgets/drawer.dart';
 import '../widgets/song_list_tile.dart';
 import '../providers/songs_provider.dart';
 import '../services/background_audio_service.dart';
+import '../modals/song.dart';
 
 class MusicScreen extends StatefulWidget {
   static const String routeName = '/music-player';
@@ -21,15 +21,8 @@ class _MusicScreenState extends State<MusicScreen> {
   bool searchMode = false;
   @override
   void initState() {
-    setState(() {
-      loading = true;
-    });
     Future.delayed(Duration(seconds: 0)).then((value) async {
-      await Provider.of<SongsProvider>(context, listen: false).getSongs();
       await initAudioService();
-      setState(() {
-        loading = false;
-      });
     });
     super.initState();
   }
@@ -46,12 +39,10 @@ class _MusicScreenState extends State<MusicScreen> {
 
   @override
   Widget build(BuildContext context) {
-    List<SongInfo> mySongs =
-        Provider.of<SongsProvider>(context).mySongs;
-    List<SongInfo> searchRes =
-        Provider.of<SongsProvider>(context)
-            .searchRes(searchText);
-    SongInfo currentSong = Provider.of<SongsProvider>(context).currentSong;
+    List<Song> mySongs = Provider.of<SongsProvider>(context).mySongs;
+    List<Song> searchRes =
+        Provider.of<SongsProvider>(context).searchRes(searchText);
+    Song currentSong = Provider.of<SongsProvider>(context).currentSong;
     return Scaffold(
         drawer: MainDrawer(),
         appBar: AppBar(
@@ -86,7 +77,7 @@ class _MusicScreenState extends State<MusicScreen> {
                   Expanded(
                     child: ListView.builder(
                         itemBuilder: (ctx, i) => SongListTile(
-                              songInfo: searchMode ? searchRes[i] : mySongs[i],
+                              song: searchMode ? searchRes[i] : mySongs[i],
                             ),
                         itemCount:
                             searchMode ? searchRes.length : mySongs.length),
@@ -110,7 +101,7 @@ class _MusicScreenState extends State<MusicScreen> {
                               ),
                             ),
                           ),
-                          Text(currentSong.title),
+                          Expanded(child: Text(currentSong.title)),
                           IconButton(
                             icon: Icon(Icons.skip_previous),
                             onPressed: () async {
@@ -124,7 +115,7 @@ class _MusicScreenState extends State<MusicScreen> {
                               await AudioService.connect();
                               AudioService.start(
                                   backgroundTaskEntrypoint: entrypoint,
-                                  params: {'path': previousSong.filePath});
+                                  params: {'path': previousSong.path});
                             },
                           ),
                           StreamBuilder(
@@ -135,15 +126,14 @@ class _MusicScreenState extends State<MusicScreen> {
                                   icon: Icon(isPlaying
                                       ? Icons.stop
                                       : Icons.play_arrow),
-                                  onPressed: () {
+                                  onPressed: () async {
                                     isPlaying
                                         ? AudioService.stop()
                                         : AudioService.start(
                                             backgroundTaskEntrypoint:
                                                 entrypoint,
-                                            params: {
-                                                'path': currentSong.filePath
-                                              });
+                                            params: {'path': currentSong.path});
+
                                     setState(() {
                                       isPlaying = !isPlaying;
                                     });
@@ -162,7 +152,7 @@ class _MusicScreenState extends State<MusicScreen> {
                               await AudioService.connect();
                               AudioService.start(
                                   backgroundTaskEntrypoint: entrypoint,
-                                  params: {'path': nextSong.filePath});
+                                  params: {'path': nextSong.path});
                             },
                           )
                         ],

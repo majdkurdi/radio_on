@@ -1,19 +1,23 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
+import 'package:permission_handler/permission_handler.dart';
+import '../modals/song.dart';
 
 class SongsProvider with ChangeNotifier {
-  List<SongInfo> _mySongs;
-  SongInfo _currentSong;
+  List<Song> _mySongs = [];
+  Song _currentSong;
 
-  SongInfo get currentSong {
+  Song get currentSong {
     return _currentSong;
   }
 
-  List<SongInfo> get mySongs {
+  List<Song> get mySongs {
     return [..._mySongs];
   }
 
-  List<SongInfo> searchRes(String sText) {
+  List<Song> searchRes(String sText) {
     if (sText == null || sText == '') return [];
     return _mySongs
         .where((element) =>
@@ -22,24 +26,36 @@ class SongsProvider with ChangeNotifier {
   }
 
   Future<void> getSongs() async {
-    FlutterAudioQuery audioQuery = FlutterAudioQuery();
+    if (await Permission.storage.request().isGranted) {
+      Directory dir = Directory('/storage/emulated/0/');
 
-    _mySongs = await audioQuery.getSongs();
-    notifyListeners();
+      List<FileSystemEntity> _files;
+      List<Song> _songs = [];
+      _files = dir.listSync(recursive: true, followLinks: false);
+      for (FileSystemEntity entity in _files) {
+        String path = entity.path;
+        if (path.endsWith('.mp3') || path.endsWith('.wav')) {
+          var songTitle = entity.path.split('/').last.replaceAll('.mp3', '');
+          _songs.add(Song(title: songTitle, path: entity.path));
+        }
+      }
+      print(_songs.length);
+      _mySongs = _songs;
+    }
   }
 
-  void setSong(SongInfo song) {
+  void setSong(Song song) {
     _currentSong = song;
     notifyListeners();
   }
 
-  SongInfo get nextSong {
+  Song get nextSong {
     var currentIndex =
         _mySongs.indexWhere((element) => element.title == _currentSong.title);
     return _mySongs[(currentIndex + 1)];
   }
 
-  SongInfo get previousSong {
+  Song get previousSong {
     var currentIndex =
         _mySongs.indexWhere((element) => element.title == _currentSong.title);
     return _mySongs[(currentIndex - 1)];

@@ -1,9 +1,9 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_audio_query/flutter_audio_query.dart';
 import 'package:provider/provider.dart';
 import '../providers/songs_provider.dart';
 import '../services/background_audio_service.dart';
+import '../modals/song.dart';
 
 class PlayerScreen extends StatefulWidget {
   static const String routeName = '/player-screen';
@@ -15,7 +15,7 @@ class PlayerScreen extends StatefulWidget {
 class _PlayerScreenState extends State<PlayerScreen> {
   @override
   Widget build(BuildContext context) {
-    SongInfo currrentSong = Provider.of<SongsProvider>(context).currentSong;
+    Song currrentSong = Provider.of<SongsProvider>(context).currentSong;
     return Scaffold(
       appBar: AppBar(
         title: Text('Player'),
@@ -38,6 +38,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               FloatingActionButton(
+                heroTag: 'btn3',
                 backgroundColor: Theme.of(context).primaryColor,
                 onPressed: () async {
                   var previousSong =
@@ -49,7 +50,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                   await AudioService.connect();
                   AudioService.start(
                       backgroundTaskEntrypoint: entrypoint,
-                      params: {'path': previousSong.filePath});
+                      params: {'path': previousSong.path});
                 },
                 child: Icon(Icons.skip_previous),
               ),
@@ -57,13 +58,14 @@ class _PlayerScreenState extends State<PlayerScreen> {
                 builder: (context, snapshot) {
                   var playing = snapshot.data?.playing ?? false;
                   return FloatingActionButton(
+                    heroTag: 'btn2',
                     backgroundColor: Theme.of(context).primaryColor,
                     onPressed: () {
                       playing
                           ? AudioService.stop()
                           : AudioService.start(
                               backgroundTaskEntrypoint: entrypoint,
-                              params: {'path': currrentSong.filePath});
+                              params: {'path': currrentSong.path});
                     },
                     child: Icon(playing ? Icons.stop : Icons.play_arrow),
                   );
@@ -71,6 +73,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                 stream: AudioService.playbackStateStream,
               ),
               FloatingActionButton(
+                heroTag: 'btn1',
                 backgroundColor: Theme.of(context).primaryColor,
                 onPressed: () async {
                   var nextSong =
@@ -82,7 +85,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                   await AudioService.connect();
                   AudioService.start(
                       backgroundTaskEntrypoint: entrypoint,
-                      params: {'path': nextSong.filePath});
+                      params: {'path': nextSong.path});
                 },
                 child: Icon(Icons.skip_next),
               ),

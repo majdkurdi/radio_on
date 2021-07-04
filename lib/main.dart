@@ -1,6 +1,7 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/RadioScreen.dart';
 import './screens/welcome_screen.dart';
 import './screens/music_screen.dart';
@@ -10,6 +11,8 @@ import './providers/channels_provider.dart';
 import './providers/songs_provider.dart';
 
 void main() {
+  SharedPreferences.setMockInitialValues({});
+
   runApp(MyApp());
 }
 
